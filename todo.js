@@ -84,39 +84,38 @@ let $todo_list = {
                 let todoItem = $todo_list.createTodoItemNode(_[i])
                 todo_list.appendChild(todoItem)
             }
-
-            let addTodo = document.getElementsByClassName('todo-form')[0]
-            addTodo.addEventListener('submit',e=>{
-                e.preventDefault()
-                let _title = document.getElementsByClassName('todo-text-input')[0]
-                if(_title.value.length!==0){
-
-                    todos.add({id:todos.getNewId(),title:_title.value,completed:false})
-                    $todo_list.re_render()
-                    _title.value = ''
-                }
-            })
-
-            let removeTodoButton = document.querySelectorAll('.todo-item-remove')
-            removeTodoButton.forEach(button => {
-                button.addEventListener('click',function(e){
-                    let id = this.getAttribute('data-id')
-                    todos.remove(id)
-                    $todo_list.re_render()
-                })
-
-            });
-            let completedTodoButton = document.querySelectorAll('.todo-item-completed')
-            completedTodoButton.forEach(button=>{
-                button.addEventListener('click',function(e){
-                    let id = this.getAttribute('data-id')
-                    console.log(id)
-                    todos.markTodoComplete(id)
-                    $todo_list.re_render()
-                })
-   
-            })
         }
+        let addTodo = document.getElementsByClassName('todo-form')[0]
+        addTodo.addEventListener('submit',e=>{
+            e.preventDefault()
+            let _title = document.getElementsByClassName('todo-text-input')[0]
+            if(_title.value.length!==0){
+
+                todos.add({id:todos.getNewId(),title:_title.value,completed:false})
+                $todo_list.re_render()
+                _title.value = ''
+            }
+        })
+
+        let removeTodoButton = document.querySelectorAll('.todo-item-remove')
+        removeTodoButton.forEach(button => {
+            button.addEventListener('click',function(e){
+                let id = this.getAttribute('data-id')
+                todos.remove(id)
+                $todo_list.re_render()
+            })
+
+        });
+        let completedTodoButton = document.querySelectorAll('.todo-item-completed')
+        completedTodoButton.forEach(button=>{
+            button.addEventListener('click',function(e){
+                let id = this.getAttribute('data-id')
+                console.log(id)
+                todos.markTodoComplete(id)
+                $todo_list.re_render()
+            })
+
+        })
 
     },
     createTodoItemNode:(todo)=>{
