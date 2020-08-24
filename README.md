@@ -1,3 +1,4 @@
 # todo_app_vanilla
 quick browser side todo app using vanilla js, uses localstorage
-Test 2
+
+Github Pages Demo: https://geekmors.github.io/todo_app_vanilla/
