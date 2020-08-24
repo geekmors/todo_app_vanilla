@@ -14,6 +14,7 @@ body{
     background-size: cover;
 }
 .main{
+	height:100%;
     width: 100%;
     background-color: #b7b7b7ab;
     position: absolute;
@@ -55,6 +56,7 @@ input.todo-form-submit {
     text-transform: uppercase;
     border: 1px solid var(--red-theme);
     transition: 0.3s ease-in-out all;
+    padding:15px;
 }
 
 input.todo-form-submit:hover{
