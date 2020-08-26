@@ -60,11 +60,12 @@
             return db.getAllFromStore(this.storeName).filter(i => i.id == id)[0]
         }
     }
-    const getClass = classString => classString.indexOf(" ") != -1 ? classString.split(" ") : classString
+    var getClass = classString => classString.indexOf(" ") != -1 ? classString.split(" ") : classString
     function todoItemTitle(title, _class) {
+        console.log(_class, ...getClass(_class))
         var span = document.createElement('span')
         span.innerText = title;
-        (span.classList.add(...getClass(_class)))||(span.classList.add(getClass(_class)))
+        typeof getClass(_class) == "string"? span.classList.add(getClass(_class)): span.classList.add(...getClass(_class))
         return span
     }
     function todoListItem(_class, data_id, children) {
@@ -87,7 +88,7 @@
         var btn = document.createElement('button')
         btn.setAttribute('data-id', dataId)
         btn.innerText = label;
-        (btn.classList.add(...getClass(_class)))||(btn.classList.add(getClass(_class)))
+        typeof getClass(_class) == "string"? btn.classList.add(getClass(_class)): btn.classList.add(...getClass(_class))
         return btn
     }
     class TodosComponent {
