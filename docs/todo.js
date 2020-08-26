@@ -1,164 +1,133 @@
-let data = {
-    setStore:function(store){
-        console.log('data.setstore invoked')
-        window.localStorage.setItem(store.name,JSON.stringify(store.data))
-        return this
-    },
-    getDataStore:function(storeName){
-        if(window.localStorage.getItem(storeName)==null)
-            return null
-        else
-            return window.localStorage.getItem(storeName)
+((function () {
+    const DB_STORENAME = "mytodos"
+    class db {
+        constructor(store) {
+            this.createStoreIfNotExists(store)
+        }
+        createStoreIfNotExists(store) {
+            if (!window.localStorage.getItem(store))
+                window.localStorage.setItem(store, JSON.stringify([]))
+        }
+        static getAllFromStore(store) {
+            return JSON.parse(localStorage.getItem(store))
+        }
+        static saveToStore(store, data) {
+            localStorage.setItem(store, JSON.stringify(data))
+        }
     }
-}
-
-let todos = {
-    
-    getAll:()=>{
-        console.log('todos.getAll invoked')
-        if(data.getDataStore('mytodos')==null)
-            return null
-        else return JSON.parse(data.getDataStore('mytodos'))
-    },
-    add:(todo)=>{
-        console.log('todos.add invoked')
-        let _ = todos.getAll()
-        if(_==null){
-            todos.save([todo])
+    function Todo(content) {
+        return { content:content, id: Todos.getNewId(), isComplete: false}
+    }
+    class Todos {
+        constructor(storeName) {
+            this.storeName = storeName
+            this.initStore()
         }
-        else
-            todos.save([..._,todo])
-        return this
-    },
-    getNewId:()=>{
-        console.log('todos.getNewId invoked')
-        let _ =  todos.getAll()
-        _ = _?_:[]
-        let id = 0
-        for(let i = 0;i<_.length;i++){
-            id = id>_[i].id?id:_[i].id
+        initStore() {
+            new db(this.storeName)
         }
-        return ++id
-    },
-    remove:(id)=>{
-        let _ = todos.getAll()
-        if(_==null){
-            return
+        static getNewId() {
+            let data = db.getAllFromStore(DB_STORENAME)
+            data = data.length ? data : [{ id: 0 }]
+            return Math.max(...data.map(i => i.id)) + 1
         }
-        else{
-            
-            todos.save(_.filter(_todo=>_todo.id!=id))
+        create(content, $component) {
+            var data = db.getAllFromStore(this.storeName)
+            data.push(Todo(content))
+            db.saveToStore(this.storeName, data)
+            $component.renderList(data)
         }
-    },
-    save:(_data)=>{
-        console.log('todos.save invoked')
-        data.setStore({name:'mytodos',data:_data})
-    },
-    markTodoComplete:(id)=>{
-        let _ = todos.getAll()
-        if(_){
-            _.map(_todo=>{
-                if(_todo.id==id)
-                    _todo.completed = !_todo.completed
-                return _todo
+        remove(id, $component) {
+            var data = db.getAllFromStore(this.storeName)
+            data = data.filter(i => i.id != id)
+            db.saveToStore(this.storeName, data)
+            $component.renderList(data)
+        }
+        setIsComplete(id, state, $component) {
+            var data = this.getAll()
+            data = data.map(d => {
+                if (d.id == id)
+                    d.isComplete = state
+                return d
             })
-            todos.save(_)
+            db.saveToStore(DB_STORENAME, data)
+            $component.renderList(data)
+        }
+        getAll() {
+            return db.getAllFromStore(this.storeName)
+        }
+        getById(id) {
+            return db.getAllFromStore(this.storeName).filter(i => i.id == id)[0]
         }
     }
-}
-
-let $todo_list = {
-    re_render:()=>{
-        $todo_list.render()
-    },
-    render:()=>{
-        let todo_list = document.getElementById('todo-list')
-
-        todo_list.innerHTML = ''
-
-        let _ = todos.getAll()
-        if(_){
-            
-            
-            for(let i = 0; i<_.length;i++){
-                let todoItem = $todo_list.createTodoItemNode(_[i])
-                todo_list.appendChild(todoItem)
-            }
+    const getClass = classString => classString.indexOf(" ") != -1 ? classString.split(" ") : classString
+    function todoItemTitle(title, _class) {
+        var span = document.createElement('span')
+        span.innerText = title;
+        (span.classList.add(...getClass(_class)))||(span.classList.add(getClass(_class)))
+        return span
+    }
+    function todoListItem(_class, data_id, children) {
+        var listItem = document.createElement('li')
+        listItem.classList.add(_class)
+        listItem.setAttribute('data-id', data_id)
+        for (var child of children)
+            listItem.appendChild(child)
+        return listItem
+    }
+    function ItemControls(buttonList) {
+        var itemControlCon = document.createElement('div')
+        itemControlCon.classList.add("item-controls")
+        for (var btn of buttonList) {
+            itemControlCon.appendChild(btn)
         }
-        let addTodo = document.getElementsByClassName('todo-form')[0]
-        addTodo.addEventListener('submit',e=>{
+        return itemControlCon
+    }
+    function buttonEl(_class, dataId, label) {
+        var btn = document.createElement('button')
+        btn.setAttribute('data-id', dataId)
+        btn.innerText = label;
+        (btn.classList.add(...getClass(_class)))||(btn.classList.add(getClass(_class)))
+        return btn
+    }
+    class TodosComponent {
+        constructor(formId, listId, inputId) {
+            this.todoForm = document.getElementById(formId)
+            this.todoList = document.getElementById(listId)
+            this.todoInput = document.getElementById(inputId)
+            this.todoForm.onsubmit = this.onTodoFormSubmitHandler.bind(this)
+            var todos = (new Todos(DB_STORENAME)).getAll()
+            this.renderList(todos ? todos : [])
+        }
+        onTodoFormSubmitHandler(e) {
             e.preventDefault()
-            let _title = document.getElementsByClassName('todo-text-input')[0]
-            if(_title.value.length!==0){
-
-                todos.add({id:todos.getNewId(),title:_title.value,completed:false})
-                $todo_list.re_render()
-                _title.value = ''
-            }
-        })
-
-        let removeTodoButton = document.querySelectorAll('.todo-item-remove')
-        removeTodoButton.forEach(button => {
-            button.addEventListener('click',function(e){
-                let id = this.getAttribute('data-id')
-                todos.remove(id)
-                $todo_list.re_render()
-            })
-
-        });
-        let completedTodoButton = document.querySelectorAll('.todo-item-completed')
-        completedTodoButton.forEach(button=>{
-            button.addEventListener('click',function(e){
-                let id = this.getAttribute('data-id')
-                console.log(id)
-                todos.markTodoComplete(id)
-                $todo_list.re_render()
-            })
-
-        })
-
-    },
-    createTodoItemNode:(todo)=>{
-        console.log(todo)
-        let todo_li = document.createElement('li')
-        todo_li.classList.add('todo-list-item')
-        let todo_span = document.createElement('span')
-        todo_span.classList.add('todo-item-title')
-        let todo_span_text = document.createTextNode(todo.title)
-        todo_span.appendChild(todo_span_text)
-        let todo_div = document.createElement('div')
-        todo_div.classList.add('item-controls')
-        let todo_button_remove = document.createElement('button')
-        todo_button_remove.classList.add('todo-item-remove')
-        let todo_button_remove_text = document.createTextNode('remove')
-        todo_button_remove.appendChild(todo_button_remove_text)
-        todo_button_remove.setAttribute('data-id',todo.id)
-        let todo_button_complete = document.createElement('button')
-        todo_button_complete.classList.add('todo-item-completed')
-        todo_button_complete.setAttribute('data-id',todo.id)
-        let todo_button_complete_text = document.createTextNode(todo.completed?'completed':'complete')
-        todo_button_complete.appendChild(todo_button_complete_text)
-
-        if(todo.completed){
-            todo_span.classList.add('done')
-            todo_button_complete.classList.add('true')
-            todo_li.classList.add('completed')
+            this.NewTodoContent = this.todoInput.value
+            if (this.NewTodoContent.length > 0)
+                (new Todos(DB_STORENAME)).create(this.NewTodoContent, this)
         }
-
-        todo_li.appendChild(todo_span)
-        
-        todo_div.appendChild(todo_button_remove)
-        todo_div.appendChild(todo_button_complete)
-
-
-        todo_li.appendChild(todo_div)
-        todo_li.setAttribute('data-id',todo.id)
-
-        return todo_li
-
+        renderList(data) {
+            this.todoList.innerHTML = ""
+            for (var d of data) {
+                var title = todoItemTitle(d.content, `todo-item-title${d.isComplete ? " done" : ""}`)
+                var controls = ItemControls([buttonEl("todo-item-remove", d.id, "remove"), buttonEl(`todo-item-completed${d.isComplete ? " true" : ""}`, d.id, "complete")])
+                var item = todoListItem("todo-list-item", d.id, [title, controls])
+                this.todoList.appendChild(item)
+            }
+            this.initEventHandlers()
+        }
+        initEventHandlers() {
+            var $this = this
+            var removeButtonList = document.getElementsByClassName("todo-item-remove")
+            var completeButtonList = document.getElementsByClassName("todo-item-completed")
+            for (let i = 0; i < removeButtonList.length; i++) {
+                removeButtonList[i].addEventListener("click", function (e) {
+                    (new Todos(DB_STORENAME)).remove(parseInt(removeButtonList[i].getAttribute("data-id")), $this)
+                })
+                completeButtonList[i].addEventListener("click", function (e) {
+                    (new Todos(DB_STORENAME)).setIsComplete(parseInt(completeButtonList[i].getAttribute("data-id")), completeButtonList[i].classList.contains("true") ? false : true, $this)
+                })
+            }
+        }
     }
-}
-
-$todo_list.render()
-
-document.getElementsByTagName('body')[0].style.backgroundImage='url(https://picsum.photos/'+window.innerWidth+'/'+window.outerHeight+')'
+    new TodosComponent("todo-input", "todo-list", "todo_text_input")
+})())

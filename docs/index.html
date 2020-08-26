@@ -14,8 +14,8 @@
                <span class="greenShadow">My</span> <span class="redShadow">Todos</span>
             </h2>
             <div class="todo-content">
-                <form class="todo-form">
-                    <input type="text" class="todo-text-input" placeholder="Add Todo Item" name="todo_text_input" />
+                <form class="todo-form" id="todo-input">
+                    <input type="text" id="todo_text_input" class="todo-text-input" placeholder="Add Todo Item" name="todo_text_input" />
                     <input type="submit" class="todo-form-submit" />
                 </form>
             </div>
@@ -29,5 +29,8 @@
     </div>
 
     <script src="/todo_app_vanilla/todo.js"></script>
+    <script>        
+        document.getElementsByTagName('body')[0].style.backgroundImage='url(https://picsum.photos/'+window.innerWidth+'/'+window.outerHeight+')'
+    </script>
 </body>
 </html>
