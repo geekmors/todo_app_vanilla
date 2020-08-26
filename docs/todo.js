@@ -103,6 +103,7 @@
         onTodoFormSubmitHandler(e) {
             e.preventDefault()
             this.NewTodoContent = this.todoInput.value
+            this.todoInput.value = ""
             if (this.NewTodoContent.length > 0)
                 (new Todos(DB_STORENAME)).create(this.NewTodoContent, this)
         }
