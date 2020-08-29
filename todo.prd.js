@@ -1,20 +1,5 @@
 ((function () {
     const DB_STORENAME = "mytodos"
-    class db {
-        constructor(store) {
-            this.createStoreIfNotExists(store)
-        }
-        createStoreIfNotExists(store) {
-            if (!window.localStorage.getItem(store))
-                window.localStorage.setItem(store, JSON.stringify([]))
-        }
-        static getAllFromStore(store) {
-            return JSON.parse(localStorage.getItem(store))
-        }
-        static saveToStore(store, data) {
-            localStorage.setItem(store, JSON.stringify(data))
-        }
-    }
     function Todo(content) {
         return { content:content, id: Todos.getNewId(), isComplete: false}
     }
@@ -61,11 +46,10 @@
         }
     }
     var getClass = classString => classString.indexOf(" ") != -1 ? classString.split(" ") : classString
-    function todoItemTitle(title, _class) {
-        console.log(_class, ...getClass(_class))
+    function todoItemTitle(title, _class) {        
         var span = document.createElement('span')
         span.innerText = title;
-        typeof getClass(_class) == "string"? span.classList.add(getClass(_class)): span.classList.add(...getClass(_class))
+        span.classList.add(_class)
         return span
     }
     function todoListItem(_class, data_id, children) {
@@ -76,18 +60,19 @@
             listItem.appendChild(child)
         return listItem
     }
-    function ItemControls(buttonList) {
-        var itemControlCon = document.createElement('div')
-        itemControlCon.classList.add("item-controls")
+    function DivContainer(_class,buttonList) {
+        var divContainer = document.createElement('div')
+        typeof getClass(_class) == "string"? divContainer.classList.add(getClass(_class)): divContainer.classList.add(...getClass(_class))
         for (var btn of buttonList) {
-            itemControlCon.appendChild(btn)
+            divContainer.appendChild(btn)
         }
-        return itemControlCon
+        return divContainer
     }
-    function buttonEl(_class, dataId, label) {
+    function buttonEl(_class, dataId, label, title) {
         var btn = document.createElement('button')
         btn.setAttribute('data-id', dataId)
         btn.innerText = label;
+        btn.title = title
         typeof getClass(_class) == "string"? btn.classList.add(getClass(_class)): btn.classList.add(...getClass(_class))
         return btn
     }
@@ -107,14 +92,30 @@
             if (this.NewTodoContent.length > 0)
                 (new Todos(DB_STORENAME)).create(this.NewTodoContent, this)
         }
+        updateStats(data){
+            var total = data.length
+            var completed = data.filter(i=>i.isComplete == true).length
+            completed = (completed * 100) / total
+            document.querySelectorAll('.total-todos .value')[0].innerText = total
+            if(total)
+                document.querySelectorAll('.total-complete .value')[0].innerText = Math.round(completed) + '%'
+        }
         renderList(data) {
             this.todoList.innerHTML = ""
             for (var d of data) {
-                var title = todoItemTitle(d.content, `todo-item-title${d.isComplete ? " done" : ""}`)
-                var controls = ItemControls([buttonEl("todo-item-remove", d.id, "remove"), buttonEl(`todo-item-completed${d.isComplete ? " true" : ""}`, d.id, "complete")])
-                var item = todoListItem("todo-list-item", d.id, [title, controls])
+                var title = todoItemTitle(d.content, `todo-item-title`)
+                var controls = DivContainer(
+                    "item-controls",
+                    [
+                        buttonEl(`todo-item-completed${d.isComplete ? " true" : ""}`, d.id, "≠", `mark ${d.isComplete?"not complete":"complete"}`), 
+                        buttonEl("todo-item-remove", d.id, "X", "remove")
+                    ]
+                )
+                var titleCon = DivContainer(`todo-title-con${d.isComplete ? " done" :""}`, [title])
+                var item = todoListItem("todo-list-item", d.id, [ controls, titleCon ])
                 this.todoList.appendChild(item)
             }
+            this.updateStats(data)
             this.initEventHandlers()
         }
         initEventHandlers() {

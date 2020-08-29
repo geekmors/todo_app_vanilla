@@ -6,20 +6,26 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Todo List Raw 2</title>
     <link rel="stylesheet" href="/todo.css">
+    <script src="/localStore.prd.js"></script>
 </head>
 <body>
-    <div class="main">
-        <div class="todo-head">
-            <h2 class="todo-title">
-               <span class="greenShadow">My</span> <span class="redShadow">Todos</span>
-            </h2>
-            <div class="todo-content">
-                <form class="todo-form" id="todo-input">
-                    <input type="text" id="todo_text_input" class="todo-text-input" placeholder="Add Todo Item" name="todo_text_input" />
-                    <input type="submit" class="todo-form-submit" />
-                </form>
-            </div>
+    <div class="panel">
+        <form action="#" id="todo-input" class="todo-input">
+            <input type="text" id="todo_text_input" name="todo_text_input" placeholder="add new todo" id="">
+            <!--<button type="submit" class="todo-form-submit">Add</button>-->
+        </form>
+        <div class="panel-stats">
+            <span class="total-todos">todos: <span class="value"></span></span> |
+            
+            <span class="total-complete">completed: <span class="value">0%</span></span>
         </div>
+    </div>
+    <div class="main">
+        <!--<div class="todo-head">
+            <h1 class="todo-title">
+               <span class="greenShadow">My</span> <span class="redShadow">Todos</span>
+            </h1>
+        </div>-->
        
         <div class="todo-todo-list-con">
             <ul id="todo-list">
@@ -28,7 +34,8 @@
         </div>
     </div>
 
-    <script src="/todo.js"></script>
+
+    <script src="/todo.prd.js"></script>
     <script>        
         document.getElementsByTagName('body')[0].style.backgroundImage='url(https://picsum.photos/'+window.innerWidth+'/'+window.outerHeight+')'
     </script>
