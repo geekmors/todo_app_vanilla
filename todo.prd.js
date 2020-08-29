@@ -97,8 +97,7 @@
             var completed = data.filter(i=>i.isComplete == true).length
             completed = (completed * 100) / total
             document.querySelectorAll('.total-todos .value')[0].innerText = total
-            if(total)
-                document.querySelectorAll('.total-complete .value')[0].innerText = Math.round(completed) + '%'
+            document.querySelectorAll('.total-complete .value')[0].innerText = total == 0? "0%" : Math.round(completed) + '%'
         }
         renderList(data) {
             this.todoList.innerHTML = ""
